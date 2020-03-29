@@ -36,8 +36,7 @@ resource "aws_elb" "web" {
 
   subnets         = [aws_subnet.default.id]
   security_groups = [aws_security_group.elb.id]
-  #instances       = [aws_instance.workshop-instance-one.id,aws_instance.workshop-instance-two.id,aws_spot_instance_request.workshop-instance-three.id]
-  instances       = [aws_instance.workshop-instance-one.id,aws_instance.workshop-instance-two.id]
+  instances       = aws_instance.workshop-instance.*.id
 
   listener {
     instance_port     = 80
@@ -48,12 +47,13 @@ resource "aws_elb" "web" {
 }
 
 
-resource "aws_instance" "workshop-instance-one" {
+resource "aws_instance" "workshop-instance" {
   key_name      = var.key_name
   ami           = lookup(var.aws_amis, var.aws_region)
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.default.id
   vpc_security_group_ids = [aws_security_group.allow_ssh_web.id]
+  count         = "3"
 
   connection {
     type        = var.connection_type
@@ -71,40 +71,40 @@ resource "aws_instance" "workshop-instance-one" {
     ]
   }
 
-  provisioner "local-exec" {
-    command = "echo ${aws_instance.workshop-instance-one.public_ip} > ip_address1.txt"
-  }
+ # provisioner "local-exec" {
+ #   command = "echo ${aws_instance.workshop-instance-one.public_ip} > ip_address1.txt"
+ # }
 
 }
 
-resource "aws_instance" "workshop-instance-two" {
-  key_name      = var.key_name
-  ami           = lookup(var.aws_amis, var.aws_region)
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.default.id
-  vpc_security_group_ids = [aws_security_group.allow_ssh_web.id]
-
-  connection {
-    type        = var.connection_type
-    user        = var.connection_username
-    private_key = file(var.private_key_path)
-    host        = self.public_ip
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo amazon-linux-extras enable nginx1.12",
-      "sudo yum -y install nginx",
-      "sudo systemctl start nginx",
-      "sudo yum -y install git && sudo rm -rf /usr/share/nginx/html/ && sudo git clone https://github.com/CharlesForsyth/charlesforsyth.github.io.git /usr/share/nginx/html/"
-    ]
-  }
-
-  provisioner "local-exec" {
-    command = "echo ${aws_instance.workshop-instance-two.public_ip} > ip_address2.txt"
-  }
-
-}
+#resource "aws_instance" "workshop-instance-two" {
+#  key_name      = var.key_name
+#  ami           = lookup(var.aws_amis, var.aws_region)
+#  instance_type = "t2.micro"
+#  subnet_id     = aws_subnet.default.id
+#  vpc_security_group_ids = [aws_security_group.allow_ssh_web.id]
+#
+#  connection {
+#    type        = var.connection_type
+#    user        = var.connection_username
+#    private_key = file(var.private_key_path)
+#    host        = self.public_ip
+#  }
+#
+#  provisioner "remote-exec" {
+#    inline = [
+#      "sudo amazon-linux-extras enable nginx1.12",
+#      "sudo yum -y install nginx",
+#      "sudo systemctl start nginx",
+#      "sudo yum -y install git && sudo rm -rf /usr/share/nginx/html/ && sudo git clone https://github.com/CharlesForsyth/charlesforsyth.github.io.git /usr/share/nginx/html/"
+#    ]
+#  }
+#
+#  provisioner "local-exec" {
+#    command = "echo ${aws_instance.workshop-instance-two.public_ip} > ip_address2.txt"
+#  }
+#
+#}
 
 
 resource "aws_security_group" "allow_ssh_web" {
@@ -161,45 +161,3 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
-#module "website_s3_bucket" {
-#  source = "./modules/aws-s3-static-website-bucket"
-#
-#  bucket_name = "ivxx-workshop-test-2703202001"
-#
-#  tags = {
-#    Terraform   = "true"
-#    Environment = "dev"
-#  }
-#}
-
-
-#resource "aws_spot_instance_request" "workshop-instance-three" {
-#  key_name      = var.key_name
-#  ami           = lookup(var.aws_amis, var.aws_region)
-#  instance_type = "t2.micro"
-#  subnet_id     = aws_subnet.default.id
-#  vpc_security_group_ids = [aws_security_group.allow_ssh_web.id]
-#
-#  connection {
-#    type        = var.connection_type
-#    user        = var.connection_username
-#    private_key = file(var.private_key_path)
-#    host        = self.public_ip
-#  }
-#
-#  provisioner "remote-exec" {
-#    inline = [
-#      "sudo amazon-linux-extras enable nginx1.12",
-#      "sudo yum -y install nginx",
-#      "sudo systemctl start nginx",
-#      "sudo yum -y install git && sudo rm -rf /usr/share/nginx/html/ && sudo git clone https://github.com/CharlesForsyth/charlesforsyth.github.io.git /usr/share/nginx/html/"
-#    ]
-#  }
-#
-#  provisioner "local-exec" {
-#    command = "echo ${aws_spot_instance_request.workshop-instance-three.public_ip} > ip_address3.txt"
-#  }
-#
-#}
-#
