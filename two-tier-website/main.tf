@@ -4,7 +4,7 @@ provider "aws" {
 
 # Create a VPC to launch our instances into
 resource "aws_vpc" "default" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.4.0.0/16"
 }
 
 # Create an internet gateway to give our subnet access to the outside world
@@ -22,7 +22,7 @@ resource "aws_route" "internet_access" {
 # Create a subnet to launch our instances into
 resource "aws_subnet" "default" {
   vpc_id                  = aws_vpc.default.id
-  cidr_block              = "10.0.42.0/24"
+  cidr_block              = "10.4.20.0/24"
   map_public_ip_on_launch = true
 }
 
@@ -77,36 +77,6 @@ resource "aws_instance" "workshop-instance" {
 
 }
 
-#resource "aws_instance" "workshop-instance-two" {
-#  key_name      = var.key_name
-#  ami           = lookup(var.aws_amis, var.aws_region)
-#  instance_type = "t2.micro"
-#  subnet_id     = aws_subnet.default.id
-#  vpc_security_group_ids = [aws_security_group.allow_ssh_web.id]
-#
-#  connection {
-#    type        = var.connection_type
-#    user        = var.connection_username
-#    private_key = file(var.private_key_path)
-#    host        = self.public_ip
-#  }
-#
-#  provisioner "remote-exec" {
-#    inline = [
-#      "sudo amazon-linux-extras enable nginx1.12",
-#      "sudo yum -y install nginx",
-#      "sudo systemctl start nginx",
-#      "sudo yum -y install git && sudo rm -rf /usr/share/nginx/html/ && sudo git clone https://github.com/CharlesForsyth/charlesforsyth.github.io.git /usr/share/nginx/html/"
-#    ]
-#  }
-#
-#  provisioner "local-exec" {
-#    command = "echo ${aws_instance.workshop-instance-two.public_ip} > ip_address2.txt"
-#  }
-#
-#}
-
-
 resource "aws_security_group" "allow_ssh_web" {
   name        = "allow_ssh_web"
   description = "Allow SSH and Web inbound traffic"
@@ -125,7 +95,7 @@ resource "aws_security_group" "allow_ssh_web" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["10.4.0.0/16"]
   }
 
   egress {
