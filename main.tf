@@ -3,8 +3,16 @@ provider "aws" {
 }
 
 
-module "nodes" {
-  source = "./ec2-nodes"
+#module "nodes" {
+#  source = "./modules/ec2-nodes"
+#
+#  thecount = 1
+#}
 
-  thecount = 5
-}
+
+#module "tier-two" {
+#  source = "./modules/two-tier-website"
+#
+#  thecount = "3"
+#}
+
