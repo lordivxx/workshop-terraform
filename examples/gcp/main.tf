@@ -4,17 +4,30 @@ provider "google" {
   credentials = file("~/terraform-ccabb4d682e8.json")
 
   project = "terraform-272703"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+  region  = "us-west2"
+  zone    = "us-west2-a"
 }
 
-resource "google_compute_network" "vpc_network" {
+#resource "google_compute_project_metadata_item" "ssh-keys" {
+#  key   = "ssh-keys"
+#  value = "${var.public_key_path}"
+#}
+
+resource "google_compute_network" "terraform-network" {
   name = "terraform-network"
 }
 
+resource "google_compute_subnetwork" "workshop-subnet" {
+  name          = "workshop-subnet"
+  ip_cidr_range = "10.4.20.0/24"
+  network       = google_compute_network.terraform-network.self_link
+  region        = "us-west2"
+}
+
 resource "google_compute_instance" "vm_instance" {
-  name         = "terraform-instance"
+  name         = "terraform-instance${count.index}"
   machine_type = "f1-micro"
+  count        = var.thecount
 
   boot_disk {
     initialize_params {
@@ -23,8 +36,43 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.name
+    subnetwork = google_compute_subnetwork.workshop-subnet.self_link
     access_config {
     }
   }
+
+  metadata = {
+    ssh-keys = "root:${file(var.public_key_path)}"
+  }
+
+  depends_on = [google_compute_network.terraform-network,google_compute_subnetwork.workshop-subnet]
+
 }
+
+resource "google_compute_firewall" "all-inbound" {
+  name    = "all-inbound"
+  network = google_compute_network.terraform-network.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  allow {
+    protocol = "icmp"
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
+resource "google_compute_firewall" "all-outbound" {
+  name    = "all-outbound"
+  network = google_compute_network.terraform-network.name
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
