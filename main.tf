@@ -24,16 +24,16 @@ provider "aws" {
 #  thecount = 1
 #}
 
-module "website_s3_bucket" {
-  source = "./modules/aws-s3-static-website-bucket"
-
-  bucket_name = "ivxx2020040101"
-
-  tags = {
-    Terraform   = "true"
-    Environment = "dev"
-  }
-}
+#module "website_s3_bucket" {
+#  source = "./modules/aws-s3-static-website-bucket"
+#
+#  bucket_name = "ivxx2020040101"
+#
+#  tags = {
+#    Terraform   = "true"
+#    Environment = "dev"
+#  }
+#}
 
 #module "tier-two" {
 #  source = "./modules/two-tier-website"
