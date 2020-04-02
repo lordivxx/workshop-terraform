@@ -1,6 +1,6 @@
-#provider "aws" {
-#  region = var.aws_region
-#}
+provider "aws" {
+  region = var.aws_region
+}
 #
 #provider "google" {
 #  version = "3.5.0"
@@ -18,12 +18,22 @@
 #  thecount = 1
 #}
 
-module "gcpnodes" {
-  source = "./examples/gcp"
+#module "gcpnodes" {
+#  source = "./examples/gcp"
+#
+#  thecount = 1
+#}
 
-  thecount = 1
+module "website_s3_bucket" {
+  source = "./modules/aws-s3-static-website-bucket"
+
+  bucket_name = "ivxx2020040101"
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
 }
-
 
 #module "tier-two" {
 #  source = "./modules/two-tier-website"

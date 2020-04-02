@@ -1,0 +1,1 @@
+google_compute_instance.terraform-instance0.public_ip

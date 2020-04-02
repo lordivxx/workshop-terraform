@@ -5,7 +5,7 @@ provider "aws" {
 module "website_s3_bucket" {
   source = "../../modules/aws-s3-static-website-bucket"
 
-  bucket_name = "ivxx-workshop-test-2020032903"
+  bucket_name = "ivxx-workshop-test-2020033102"
 
   tags = {
     Terraform   = "true"

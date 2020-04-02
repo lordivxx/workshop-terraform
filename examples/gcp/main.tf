@@ -4,8 +4,8 @@ provider "google" {
   credentials = file("~/terraform-ccabb4d682e8.json")
 
   project = "terraform-272703"
-  region  = "us-west2"
-  zone    = "us-west2-a"
+  region  = "us-west1"
+  zone    = "us-west1-a"
 }
 
 #resource "google_compute_project_metadata_item" "ssh-keys" {
@@ -21,7 +21,7 @@ resource "google_compute_subnetwork" "workshop-subnet" {
   name          = "workshop-subnet"
   ip_cidr_range = "10.4.20.0/24"
   network       = google_compute_network.terraform-network.self_link
-  region        = "us-west2"
+  region        = "us-west1"
 }
 
 resource "google_compute_instance" "vm_instance" {
@@ -42,7 +42,11 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
-    ssh-keys = "root:${file(var.public_key_path)}"
+    ssh-keys = "chuck_forsyth:${file(var.public_key_path)}"
+  }
+
+  provisioner "local-exec" {
+    command = "echo google_compute_instance.terraform-instance${count.index}.public_ip >> ip_address.txt"
   }
 
   depends_on = [google_compute_network.terraform-network,google_compute_subnetwork.workshop-subnet]
